@@ -1,0 +1,29 @@
+Using 1-vs-all classification for fb problem
+--------------------------------------------
+
+1. For a given grid ID, identify the k place_ids that have rows in train set
+2. Use 1-vs-all clasification to find P(y=k|x) for each of the k place_ids (hopefully this is a much smaller number than 100,000)
+3. Repeat for all 400 grid IDs
+
+Features engineering:
+
+1. Features include X, Y, Accuracy, Day, Hour
+2. Day and hour are labels so use 1-hot encoding to get 7 columns for Day and 24 columns for Hour
+3. For each model select rows based on grid ID (say N)
+4. Use Logistic Regression
+	- Use logistic regression with 1-vs-all classification approach to come up with k models (each predicts P(y=k|x)
+	- Predicted class is the one with highest P(y=k|x)
+5. Alternatively use Naive Bayes
+	- Compute apriori probabilities P(y=k) using (#rows with y=k)/N
+	- Could use naive bayes to compute P(y=k|x) (Do we have P(x) for all features?)
+6. Repeat 3-5 for all k classes (k 1-vs-all models) 
+7. Repeat 3-6 for all 400 grid IDs
+
+Dimensional analysis
+--------------------
+- 30MM rows
+- Assuming data is uniformly distributed across 400 grids, each grid has 75000 rows
+- assuming place_ids are uniformly distributed across 400 grids each grid has 250 place_ids
+- could prune k classes by only considering top c classes that account for say 90% of the rows - this will bring number down from 250 to say 10
+- total number of models to be learned is 400 x 10 = 4000
+- total number of columns is 34 (X,Y,D1-D7, H1-H24, Accuracy)
